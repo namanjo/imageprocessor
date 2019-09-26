@@ -1,10 +1,8 @@
 from PIL import Image
 from PIL import ImageFilter
 
-sanfran = Image.open('sanfran.png')
-ryan = Image.open('ryan.png')
 
-
+#IMAGE TRANSFORMATIONS
 def crop(pic):
     print("The size of pic is: " + str(pic.size))
     print("You have to give 4 coordinates to crop, i.e X coor & Y coor")
@@ -13,64 +11,68 @@ def crop(pic):
         coordinate = int(input('Enter Point ' + str(i) + ": "))
         area.append(coordinate)
     cropped_image = pic.crop(area)
-    cropped_image.show()
+    return cropped_image
 
 
-def rotations(pic, action):
-    if action is 'left':
+def rotations(pic):
+    action = input("Rotate left, right, down, or u want to get the mirror effect?: ").lower()
+
+    if action.startswith('l'):
         left = pic.transpose(Image.ROTATE_90)
-        left.show()
+        return left
 
-    if action is 'right':
+    if action.startswith('r'):
         right = pic.transpose(Image.ROTATE_270)
-        right.show()
+        return right
 
-    if action is 'down':
+    if action.startswith('d'):
         down = pic.transpose(Image.ROTATE_180)
-        down.show()
+        return down
 
-    if action is 'mirror':
+    if action.startswith('m'):
         mirror_image = pic.transpose(Image.FLIP_LEFT_RIGHT)
-        mirror_image.show()
+        return mirror_image
 
 
 def resize(pic):
     length, breadth = pic.size
-    print("Currently The Dimensions Of your Photo are, " + "Length: " + str(length) + ", Breadth: " + str(breadth))
-    print('Now give the dimensions you want to resize the photo')
+    print("\nCurrently The Dimensions Of your Photo are, " + "Length: " + str(length) + ", Breadth: " + str(breadth))
+    print('Now give the dimensions you want to resize the photo to')
     new_length = int(input("Enter the new length: "))
     new_breadth = int(input('Enter the new breadth: '))
     resize_image = pic.resize((new_length, new_breadth))
-    resize_image.show()
+    return resize_image
 
 
-def cool_filters(pic, type):
+#IMAGE EDITING
+def cool_filters(pic, cool_inp):
+
     r, g, b = pic.split()
 
-    if type is 'bw1':
+    if cool_inp == 'bw1':
         black_white_1 = pic.convert('L')
-        black_white_1.show()
+        return black_white_1
 
-    if type is 'bw2':
-        r.show()
+    if cool_inp == 'bw2':
+        return r
 
-    if type is 'bw3':
-        g.show()
+    if cool_inp == 'bw3':
+        return g
 
-    if type is 'bw4':
-        b.show()
+    if cool_inp == 'bw4':
+        return b
 
-    if type is 'blur':
+    if cool_inp == 'blur':
         blur = pic.filter(ImageFilter.BLUR)
-        blur.show()
+        return blur
 
-    if type is 'sharpen':
+    if cool_inp == 'sharpen':
         sharpen = pic.filter(ImageFilter.DETAIL)
-        sharpen.show()
+        return sharpen
 
-    if type is 'outlines':
+    if cool_inp == 'outlines':
         outline = pic.filter(ImageFilter.FIND_EDGES)
-        outline.show()
+        return outline
 
 
 def square_fit(pic):
@@ -85,7 +87,7 @@ def square_fit(pic):
         coorX2 = coorX1 + breadth
         area = (0, coorX1, measure, coorX2)
         background_pic.paste(pic, area)
-        background_pic.show()
+        return background_pic
 
     if length < breadth:
         measure = breadth
@@ -96,4 +98,68 @@ def square_fit(pic):
         coorX2 = coorX1 + length
         area = (coorX1, 0, coorX2, measure)
         background_pic.paste(pic, area)
-        background_pic.show()
+        return background_pic
+
+
+def choice():
+    choice = input("Want to do it again..? ").lower()
+    if choice.startswith('y'):
+        return True
+    else:
+        return False
+
+
+photo = Image.open('sanfran.png')  #pre loaded images (one of these images will be passed as a parameter in the above functions)
+
+print('\nWelcome to Image Editor and processor.\n')
+
+
+while True:
+
+    op = int(input('Press 1 to crop, 2 to rotate, 3 to resize,\n4 to Add Effects & 5 to Square Fit: '))
+
+    if op == 1:
+        while True:
+            photo = crop(photo)
+            photo.show()
+            if not choice():
+                break
+
+    if op == 2:
+        while True:
+            photo = rotations(photo)
+            photo.show()
+            if not choice():
+                break
+
+    if op == 3:
+        while True:
+            photo = resize(photo)
+            photo.show()
+            if not choice():
+                break
+
+    if op == 4:
+        while True:
+            try:
+                cool_inp = input("Available filters: bw1, bw2, bw3, bw4, blur, sharpen & outlines, Choose 1: ")
+                pic = cool_filters(photo, cool_inp)
+                pic.show()
+                if not choice():
+                    break
+            except AttributeError:
+                print("Enter a valid filter name")
+                continue
+        photo = pic
+
+    if op == 5:
+        photo = square_fit(photo)
+        photo.show()
+
+    user_choice = input("Done all your edits?: ").lower()
+    if user_choice.startswith('y'):
+        photo.save('edited_pic.jpg')
+        print("The Edited photo has been saved.")
+        break
+    else:
+        continue
